@@ -10,6 +10,9 @@ pub enum ThemeKind {
     #[default]
     Light,
     Dark,
+    /// Low-stimulation theme: warm neutrals, one accent, no competing hues. Built for sustained
+    /// use by neurodivergent people - see `docs/calm-theme.md`.
+    Calm,
 }
 
 /// The saved user choice, independent of the light/dark colours currently displayed.
@@ -19,6 +22,7 @@ pub enum ThemePreference {
     #[default]
     Light,
     Dark,
+    Calm,
 }
 
 impl ThemePreference {
@@ -26,6 +30,8 @@ impl ThemePreference {
         match self {
             Self::Light => ThemeKind::Light,
             Self::Dark => ThemeKind::Dark,
+            // An explicit choice, so the OS never overrides it.
+            Self::Calm => ThemeKind::Calm,
             Self::System => match system {
                 Some(egui::Theme::Light) => ThemeKind::Light,
                 Some(egui::Theme::Dark) => ThemeKind::Dark,
@@ -115,6 +121,34 @@ impl Tokens {
                 page_shadow: Color32::from_black_alpha(120),
                 radius: 6,
             },
+            // Warm-neutral, single-accent, low-stimulation. Surfaces and text are the INT Digital
+            // design system's dark tokens; the greys carry a faint warm bias so nothing reads as
+            // glare. The page itself stays white - this is a reading app, and the document is not
+            // chrome. One decorative hue only, and softer corners.
+            ThemeKind::Calm => Self {
+                kind,
+                titlebar: Color32::from_rgb(0x1A, 0x1A, 0x19),
+                chrome: Color32::from_rgb(0x24, 0x24, 0x22),
+                panel: Color32::from_rgb(0x24, 0x24, 0x22),
+                pasteboard: Color32::from_rgb(0x1A, 0x1A, 0x19),
+                card: Color32::from_rgb(0x2C, 0x2C, 0x2A),
+                border: Color32::from_rgb(0x3A, 0x3A, 0x36),
+                divider: Color32::from_rgb(0x3A, 0x3A, 0x36),
+                text: Color32::from_rgb(0xF2, 0xF1, 0xEA),
+                text_muted: Color32::from_rgb(0xB3, 0xB1, 0xA6),
+                text_faint: Color32::from_rgb(0x9A, 0x98, 0x8F),
+                icon: Color32::from_rgb(0xC9, 0xC7, 0xBC),
+                hover: Color32::from_rgb(0x32, 0x32, 0x2F),
+                pressed: Color32::from_rgb(0x3A, 0x3A, 0x36),
+                selected: Color32::from_rgb(0x2E, 0x3B, 0x47),
+                accent: Color32::from_rgb(0x85, 0xB7, 0xEB),
+                accent_text: Color32::from_rgb(0xCF, 0xE3, 0xF7),
+                accent_soft: Color32::from_rgb(0x2A, 0x36, 0x42),
+                field: Color32::from_rgb(0x2C, 0x2C, 0x2A),
+                badge_new: Color32::from_rgb(0x85, 0xB7, 0xEB),
+                page_shadow: Color32::from_black_alpha(90),
+                radius: 8,
+            },
         }
     }
 
@@ -123,7 +157,7 @@ impl Tokens {
     }
 
     pub fn dark(&self) -> bool {
-        self.kind == ThemeKind::Dark
+        matches!(self.kind, ThemeKind::Dark | ThemeKind::Calm)
     }
 }
 
